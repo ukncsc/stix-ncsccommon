@@ -1,3 +1,6 @@
+import requests
+
+
 def _construct_headers():
     headers = {
         'Content-Type': 'application/xml',
