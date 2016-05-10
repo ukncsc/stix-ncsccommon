@@ -11,7 +11,7 @@ def _construct_headers():
     return headers
 
 
-def _inbox_package(endpoint_url, stix_package):
+def inbox_package(endpoint_url, stix_package):
     """Inbox the package to the adapter."""
     data = stix_package
     headers = _construct_headers()
