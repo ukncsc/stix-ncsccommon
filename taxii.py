@@ -1,8 +1,6 @@
-def _taxii(content):
-    client = create_client(CONFIG['taxii'][0]['host'], use_https=CONFIG['taxii'][0][
-                           'ssl'], discovery_path=CONFIG['taxii'][0]['discovery_path'])
+def _taxii(content, host, https, discovery, binding, username, password, inbox):
+    client = create_client(host, use_https=https, discovery_path=discovery)
     content = content
-    binding = CONFIG['taxii'][0]['binding']
-    client.set_auth(username=CONFIG['taxii'][0][
-                    'username'], password=CONFIG['taxii'][0]['password'])
-    client.push(content, binding, uri=CONFIG['taxii'][0]['inbox_path'])
+    binding = binding
+    client.set_auth(username=username, password=password)
+    client.push(content, binding, uri=inbox)
