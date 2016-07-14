@@ -1,0 +1,14 @@
+{
+  "taxii": [
+    {
+      "active": false,
+      "binding": "urn:stix.mitre.org:xml:1.1.1",
+      "discovery_path": "/taxii-discovery-service",
+      "host": "taxii.example.org",
+      "inbox": "/taxii-data",
+      "password": "password",
+      "ssl": false,
+      "username": "username"
+    }
+  ]
+}
