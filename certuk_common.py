@@ -1,7 +1,7 @@
 import json
 
 import requests
-from cabby import create_client
+from cabby import create_client, exceptions
 
 
 def _construct_headers():
@@ -10,6 +10,11 @@ def _construct_headers():
         'Accept': 'application/json'
     }
     return headers
+
+
+def get_file_contents(filename):
+    with open(filename, 'r') as fd:
+        return fd.read()
 
 
 def inbox_package(endpoint_url, stix_package):
@@ -22,8 +27,13 @@ def inbox_package(endpoint_url, stix_package):
 
 
 def taxii(content, host, https, discovery, binding, username, password, inbox):
-    client = create_client(host, use_https=https, discovery_path=discovery)
-    content = content
-    binding = binding
-    client.set_auth(username=username, password=password)
-    client.push(content, binding, uri=inbox)
+    try:
+        client = create_client(host, use_https=https, discovery_path=discovery)
+        content = content
+        binding = binding
+        client.set_auth(username=username, password=password)
+        client.push(content, binding, uri=inbox)
+        print("TAXII Successful")
+    except Exception as e:
+        print(e)
+        return False
