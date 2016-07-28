@@ -108,7 +108,7 @@ def _main(first=True):
 
 
 def _usage():
-    print("Useful help")
+    print("Usage: poller.py [first_run|check_new]")
     sys.exit(0)
 
 if __name__ == "__main__":
