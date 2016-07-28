@@ -1,0 +1,11 @@
+[TAXII]
+Proxy: False
+ProxyAddress: http://proxy.example.org:8080
+HTTPS: False
+Username: username
+Password: password
+Collection: collection.name
+Server: taxii.example.com
+Port: 80
+Path: /taxii-data/
+Days: 1
