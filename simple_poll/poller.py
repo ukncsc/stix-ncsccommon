@@ -1,3 +1,9 @@
+"""
+Basic Poller Script.
+
+This script polls a given taxii server for new messages.
+"""
+
 from ConfigParser import SafeConfigParser
 import datetime
 from datetime import timedelta
@@ -8,7 +14,10 @@ import sys
 
 import libtaxii as t
 import libtaxii.clients as tc
-from libtaxii.constants import *
+from libtaxii.constants import CB_STIX_XML_11
+from libtaxii.constants import MSG_POLL_RESPONSE
+from libtaxii.constants import RT_COUNT_ONLY
+from libtaxii.constants import VID_TAXII_XML_11
 import libtaxii.messages_11 as tm11
 from stix.core import STIXPackage
 
@@ -54,7 +63,7 @@ def _readTimestamp():
     return mtimestamp
 
 
-def main(first=True):
+def _main(first=True):
     if first:
         begin = datetime.datetime.now(tzutc()) - timedelta(days=int(days))
     else:
@@ -108,8 +117,8 @@ if __name__ == "__main__":
     except IndexError:
         _usage()
     if op == "first_run":
-        main(True)
+        _main(True)
     elif op == "check_new":
-        main(None)
+        _main(None)
     else:
         _usage()
