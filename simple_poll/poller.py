@@ -36,7 +36,32 @@ client.set_auth_credentials(
     {'username': username, 'password': password})
 
 
-def main():
+def _saveTimestamp(timestamp=None):
+    mtimestamp = timestamp
+    if not timestamp:
+        mtimestamp = datetime.datetime.now(tzutc())
+    fname = "timestamp"
+    f = open(fname, "w")
+    f.write(mtimestamp)
+    f.close()
+
+
+def _readTimestamp():
+    fname = "timestamp"
+    f = open(fname, "r")
+    mtimestamp = f.read()
+    f.close()
+    return mtimestamp
+
+
+def main(first=True):
+    if first:
+        begin = datetime.datetime.now(tzutc()) - timedelta(days=int(days))
+    else:
+        begin = _readTimestamp()
+
+    end = datetime.datetime.now(tzutc())
+
     poll_params1 = tm11.PollParameters(
         allow_asynch=False,
         response_type=RT_COUNT_ONLY,
@@ -47,9 +72,8 @@ def main():
         message_id='PollReq03',
         collection_name=collection,
         poll_parameters=poll_params1,
-        exclusive_begin_timestamp_label=datetime.datetime.now(
-            tzutc()) - timedelta(days=int(days)),
-        inclusive_end_timestamp_label=datetime.datetime.now(tzutc()),
+        exclusive_begin_timestamp_label=begin,
+        inclusive_end_timestamp_label=end,
     )
     poll_xml = poll_req3.to_xml()
 
@@ -67,10 +91,25 @@ def main():
                 with open(title + ".xml", "w") as text_file:
                     text_file.write(content.content)
                 print("[+] Successfully generated " + title)
+            _saveTimestamp(str(end))
         except Exception:
             print("[-] Error with TAXII response")
     else:
         print("[-] Error with TAXII response")
 
+
+def _usage():
+    print("Useful help")
+    sys.exit(0)
+
 if __name__ == "__main__":
-    main()
+    try:
+        op = sys.argv[1]
+    except IndexError:
+        _usage()
+    if op == "first_run":
+        main(True)
+    elif op == "check_new":
+        main(None)
+    else:
+        _usage()
