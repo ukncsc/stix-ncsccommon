@@ -67,7 +67,11 @@ def _main(first=True):
     if first:
         begin = datetime.datetime.now(tzutc()) - timedelta(days=int(days))
     else:
-        begin = _readTimestamp()
+        try:
+            begin = _readTimestamp()
+        except IOError:
+            print("[-] No timestamp file found have you 'first_run'?")
+            sys.exit(0)
 
     end = datetime.datetime.now(tzutc())
 
@@ -77,13 +81,21 @@ def _main(first=True):
         content_bindings=[tm11.ContentBinding(binding_id=CB_STIX_XML_11)],
     )
 
-    poll_req3 = tm11.PollRequest(
-        message_id='PollReq03',
-        collection_name=collection,
-        poll_parameters=poll_params1,
-        exclusive_begin_timestamp_label=begin,
-        inclusive_end_timestamp_label=end,
-    )
+    try:
+        poll_req3 = tm11.PollRequest(
+            message_id='PollReq03',
+            collection_name=collection,
+            poll_parameters=poll_params1,
+            exclusive_begin_timestamp_label=begin,
+            inclusive_end_timestamp_label=end,
+        )
+    except ValueError:
+        print("[-] Invalid timestamp file")
+        sys.exit(0)
+
+    except Exception:
+        print("[-] Error with PollRequest")
+
     poll_xml = poll_req3.to_xml()
 
     http_resp = client.call_taxii_service2(
@@ -92,17 +104,20 @@ def _main(first=True):
     taxii_message = t.get_message_from_http_response(
         http_resp, poll_req3.message_id)
     if taxii_message.message_type == MSG_POLL_RESPONSE:
-        try:
-            for content in taxii_message.content_blocks:
-                package_io = StringIO(content.content)
-                pkg = STIXPackage.from_xml(package_io)
-                title = pkg.id_.split(':', 1)[-1]
-                with open(title + ".xml", "w") as text_file:
-                    text_file.write(content.content)
-                print("[+] Successfully generated " + title)
-            _saveTimestamp(str(end))
-        except Exception:
-            print("[-] Error with TAXII response")
+        if taxii_message.content_blocks:
+            try:
+                for content in taxii_message.content_blocks:
+                    package_io = StringIO(content.content)
+                    pkg = STIXPackage.from_xml(package_io)
+                    title = pkg.id_.split(':', 1)[-1]
+                    with open(title + ".xml", "w") as text_file:
+                        text_file.write(content.content)
+                    print("[+] Successfully generated " + title)
+            except Exception:
+                print("[-] Error with TAXII response")
+        else:
+            print("[+] No content returned")
+        _saveTimestamp(str(end))
     else:
         print("[-] Error with TAXII response")
 
